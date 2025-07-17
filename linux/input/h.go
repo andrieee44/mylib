@@ -1,4 +1,7 @@
+//go:build linux
+
 // Package input implements [input.h] in the Linux kernel.
+// It also implements [mylib.InputDevice].
 //
 // [input.h]: https://github.com/torvalds/linux/blob/master/include/uapi/linux/input.h
 package input
@@ -47,6 +50,12 @@ type KeymapEntry struct {
 	Scancode [32]uint8
 }
 
+// INPUT_KEYMAP_BY_INDEX is a flag for the EVIOCGKEYCODE_V2/EVIOCSKEYCODE_V2
+// ioctls. It tells the kernel to identify the keymap entry by its Index
+// field. When set, the ioctl uses [KeymapEntry.Index] to select which key
+// mapping to get or set.
+const INPUT_KEYMAP_BY_INDEX = 1 << 0
+
 var (
 	// EVIOCGVERSION is the ioctl request code to get the evdev
 	// driver version. It reads an int into the provided variable
@@ -54,7 +63,7 @@ var (
 	EVIOCGVERSION = ioctl.IOR('E', 0x01, int(0))
 
 	// EVIOCGID is the ioctl request code to retrieve the device identifier.
-	// It reads into an InputID struct containing Bustype, Vendor, Product,
+	// It reads into an [ID] struct containing Bustype, Vendor, Product,
 	// and Version.
 	EVIOCGID = ioctl.IOR('E', 0x02, ID{})
 
@@ -71,7 +80,7 @@ var (
 	EVIOCGKEYCODE = ioctl.IOR('E', 0x04, [2]uint{})
 
 	// EVIOCGKEYCODE_V2 is the ioctl request code to get an extended
-	// keymap entry. It reads into an InputKeymapEntry struct for
+	// keymap entry. It reads into an [KeymapEntry] struct for
 	// flags, index, keycode, and scancode.
 	EVIOCGKEYCODE_V2 = ioctl.IOR('E', 0x04, KeymapEntry{})
 
@@ -80,7 +89,7 @@ var (
 	EVIOCSKEYCODE = ioctl.IOW('E', 0x04, [2]uint{})
 
 	// EVIOCSKEYCODE_V2 is the ioctl request code to set an extended
-	// keymap entry. It writes an InputKeymapEntry struct for flags,
+	// keymap entry. It writes an [KeymapEntry] struct for flags,
 	// index, keycode, and scancode.
 	EVIOCSKEYCODE_V2 = ioctl.IOW('E', 0x04, KeymapEntry{})
 )

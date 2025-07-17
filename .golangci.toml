@@ -36,6 +36,7 @@ gochecksumtype.include-shared-interfaces = true
 gocognit.min-complexity = 15
 gocritic.enable-all = true
 godot.godot.scope = "all"
+gosec.excludes = [ "G103" ]
 iface.enable = [ "identical", "unused", "opaque" ]
 importas.no-extra-aliases = true
 perfsprint.err-error = true
