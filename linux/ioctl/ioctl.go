@@ -1,6 +1,6 @@
-// Package ioctl implements ioctl.h in the Linux kernel.
+// Package ioctl implements [ioctl.h] in the Linux kernel.
 //
-// From ioctl.h:
+// From [ioctl.h]:
 //
 // ioctl command encoding: 32 bits total, command in lower 16 bits,
 // size of the parameter structure in the lower 14 bits of the
@@ -17,13 +17,12 @@
 // bits are indeed used as a type field, so we might just as well make
 // this explicit here. Please be sure to use the decoding macros
 // below from now on.
+//
+// [ioctl.h]: https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/ioctl.h
 package ioctl
 
-import (
-	"unsafe"
-)
+import "unsafe"
 
-//nolint:goconst // value duplication
 const (
 	// IOC_NRBITS is the number of bits allocated for the
 	// command number (nr) field.
@@ -81,8 +80,6 @@ const (
 // and wraps unsafe.Sizeof, converting the result to uint.
 // This is useful for validating type sizes when constructing
 // ioctl request codes.
-//
-//nolint:revive // naming
 func IOC_TYPECHECK(typ any) uint {
 	return uint(unsafe.Sizeof(typ))
 }
@@ -105,7 +102,6 @@ func IOC(dir, typ, nr, size uint) uint {
 // It encodes the given magic type and command number into a uint,
 // setting direction to _IOC_NONE and size to zero.
 func IO(typ, nr uint) uint {
-	//nolint:revive // magic number
 	return IOC(IOC_NONE, typ, nr, 0)
 }
 
@@ -154,13 +150,13 @@ func IOC_SIZE(nr uint) uint {
 	return nr >> IOC_SIZESHIFT & IOC_SIZEMASK
 }
 
-// IOC_IN returns the encoded flag for a write (user → kernel) transfer.
+// IOC_IN returns the encoded flag for a write (user -> kernel) transfer.
 // It shifts IOC_WRITE into the direction bits of an ioctl code.
 func IOC_IN() uint {
 	return IOC_WRITE << IOC_DIRSHIFT
 }
 
-// IOC_OUT returns the encoded flag for a read (kernel → user) transfer.
+// IOC_OUT returns the encoded flag for a read (kernel -> user) transfer.
 // It shifts IOC_READ into the direction bits of an ioctl code.
 func IOC_OUT() uint {
 	return IOC_READ << IOC_DIRSHIFT

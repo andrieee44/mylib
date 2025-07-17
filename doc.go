@@ -1,2 +1,2 @@
-// Package mylib is my personal collection of small libraries for Linux.
+// Package mylib is my personal collection of small libraries.
 package mylib

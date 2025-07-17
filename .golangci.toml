@@ -18,7 +18,15 @@ shorten-comments = true
 
 [linters]
 default = "all"
-disable = [ "depguard", "gochecknoglobals", "mnd", "nonamedreturns", "wsl" ]
+disable = [
+  "depguard",
+  "exhaustruct",
+  "gochecknoglobals",
+  "grouper",
+  "mnd",
+  "nonamedreturns",
+  "wsl",
+]
 
 [linters.settings]
 copyloopvar.check-alias = true
@@ -38,12 +46,10 @@ tagliatelle.use-field-name = true
 unconvert.fast-math = true
 
 [linters.settings.decorder]
-disable-const-dec-num-check = false
 disable-dec-num-check = false
 disable-dec-order-check = false
 disable-init-func-first-check = false
-disable-type-dec-num-check = false
-disable-var-dec-num-check = false
+disable-type-dec-num-check = true
 
 [linters.settings.errcheck]
 check-blank = true
@@ -59,7 +65,6 @@ exclude-godoc-examples = false
 
 [linters.settings.goconst]
 eval-const-expressions = true
-find-duplicates = true
 ignore-calls = false
 numbers = true
 
@@ -74,16 +79,6 @@ unnamedResult.checkExported = true
 enable-all = true
 shadow.strict = true
 
-[linters.settings.grouper]
-const-require-single-const = true
-const-require-grouping = true
-import-require-single-import = true
-import-require-grouping = true
-type-require-single-type = true
-type-require-grouping = true
-var-require-single-var = true
-var-require-grouping = true
-
 [linters.settings.nolintlint]
 allow-unused = false
 require-explanation = true
@@ -97,6 +92,18 @@ for-loops = true
 [linters.settings.revive]
 enable-all-rules = true
 confidence = 0
+
+[[linters.settings.revive.rules]]
+name = "line-length-limit"
+disabled = true
+
+[[linters.settings.revive.rules]]
+name = "var-naming"
+disabled = true
+
+[[linters.settings.revive.rules]]
+name = "add-constant"
+disabled = true
 
 [linters.settings.testifylint]
 enable-all = true
