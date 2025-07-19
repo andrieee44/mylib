@@ -9,8 +9,8 @@ type InputDevice interface {
 	// ID returns a stable, platform‐specific identifier for this device.
 	//
 	// On Linux (evdev), it’s formatted as
-	// "<basename>|<vendor>:<product> v<version>",
-	// e.g. "event5|045e:028e v0111".
+	// "bus <bustype> vendor <vendor> product <product> version <version>"
+	// e.g. "bus 0x3 vendor 0x46d product 0xc24f version 0x111".
 	ID() string
 
 	// HasAbsoluteAxes reports whether the device provides absolute

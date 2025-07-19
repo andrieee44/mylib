@@ -1,19 +1,13 @@
 //go:build linux
 
-// Package input implements [input.h] in the Linux kernel.
-// It also implements [mylib.InputDevice].
-//
-// [input.h]: https://github.com/torvalds/linux/blob/master/include/uapi/linux/input.h
 package input
 
 import "github.com/andrieee44/mylib/linux/ioctl"
 
 // ID identifies an input device by its bus type, vendor ID, product ID,
-// and version. It mirrors the struct input_id definition used by Linux input
-// ioctls.
+// and version.
 type ID struct {
-	// Bustype is the bus type for the device (for example, BUS_USB or
-	// BUS_SPI).
+	// Bustype is the bus type for the device.
 	Bustype uint16
 
 	// Vendor is the vendor identifier assigned by the bus.
@@ -26,14 +20,14 @@ type ID struct {
 	Version uint16
 }
 
-// KeymapEntry is used by the EVIOCGKEYCODE and EVIOCSKEYCODE ioctls
+// KeymapEntry is used by the [EVIOCGKEYCODE] and [EVIOCSKEYCODE] ioctls
 // to retrieve or modify keymap data. Lookup may be performed either
 // by the Scancode itself or by the Index in the keymap entry.
-// When using EVIOCGKEYCODE, the kernel will return either Scancode
+// When using [EVIOCGKEYCODE], the kernel will return either Scancode
 // or Index, depending on which field was used for the lookup.
 type KeymapEntry struct {
 	// Flags specifies how the kernel should handle the request.
-	// Setting INPUT_KEYMAP_BY_INDEX instructs the kernel to look up
+	// Setting [INPUT_KEYMAP_BY_INDEX] instructs the kernel to look up
 	// by Index instead of Scancode.
 	Flags uint8
 
@@ -50,21 +44,19 @@ type KeymapEntry struct {
 	Scancode [32]uint8
 }
 
-// INPUT_KEYMAP_BY_INDEX is a flag for the EVIOCGKEYCODE_V2/EVIOCSKEYCODE_V2
-// ioctls. It tells the kernel to identify the keymap entry by its Index
-// field. When set, the ioctl uses [KeymapEntry.Index] to select which key
-// mapping to get or set.
+// INPUT_KEYMAP_BY_INDEX is a flag for the [EVIOCGKEYCODE_V2] and
+// [EVIOCSKEYCODE_V2] ioctls. It tells the kernel to identify the keymap
+// entry by its Index field. When set, the ioctl uses [KeymapEntry.Index]
+// to select which key mapping to get or set.
 const INPUT_KEYMAP_BY_INDEX = 1 << 0
 
 var (
 	// EVIOCGVERSION is the ioctl request code to get the evdev
-	// driver version. It reads an int into the provided variable
-	// (e.g. 0x010000 == version 1.0.0).
+	// driver version. It reads an int into the provided variable.
 	EVIOCGVERSION = ioctl.IOR('E', 0x01, int(0))
 
 	// EVIOCGID is the ioctl request code to retrieve the device identifier.
-	// It reads into an [ID] struct containing Bustype, Vendor, Product,
-	// and Version.
+	// It reads into an [ID] struct.
 	EVIOCGID = ioctl.IOR('E', 0x02, ID{})
 
 	// EVIOCGREP is the ioctl request code to get keyboard auto‐repeat
@@ -80,8 +72,7 @@ var (
 	EVIOCGKEYCODE = ioctl.IOR('E', 0x04, [2]uint{})
 
 	// EVIOCGKEYCODE_V2 is the ioctl request code to get an extended
-	// keymap entry. It reads into an [KeymapEntry] struct for
-	// flags, index, keycode, and scancode.
+	// keymap entry. It reads into a [KeymapEntry] struct.
 	EVIOCGKEYCODE_V2 = ioctl.IOR('E', 0x04, KeymapEntry{})
 
 	// EVIOCSKEYCODE is the ioctl request code to set a simple keycode
@@ -89,8 +80,7 @@ var (
 	EVIOCSKEYCODE = ioctl.IOW('E', 0x04, [2]uint{})
 
 	// EVIOCSKEYCODE_V2 is the ioctl request code to set an extended
-	// keymap entry. It writes an [KeymapEntry] struct for flags,
-	// index, keycode, and scancode.
+	// keymap entry. It writes in a [KeymapEntry] struct.
 	EVIOCSKEYCODE_V2 = ioctl.IOW('E', 0x04, KeymapEntry{})
 )
 

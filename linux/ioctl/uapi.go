@@ -1,34 +1,8 @@
 //go:build linux
 
-// Package ioctl implements [ioctl.h] in the Linux kernel.
-//
-// From [ioctl.h]:
-//
-// ioctl command encoding: 32 bits total, command in lower 16 bits,
-// size of the parameter structure in the lower 14 bits of the
-// upper 16 bits.
-// Encoding the size of the parameter structure in the ioctl request
-// is useful for catching programs compiled with old versions
-// and to avoid overwriting user space outside the user buffer area.
-// The highest 2 bits are reserved for indicating the “access mode”.
-// NOTE: This limits the max parameter size to 16kB -1 !
-//
-// The following is for compatibility across the various Linux
-// platforms. The generic ioctl numbering scheme doesn't really enforce
-// a type field. De facto, however, the top 8 bits of the lower 16
-// bits are indeed used as a type field, so we might just as well make
-// this explicit here. Please be sure to use the decoding macros
-// below from now on.
-//
-// [ioctl.h]: https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/ioctl.h
 package ioctl
 
-import (
-	"syscall"
-	"unsafe"
-
-	"golang.org/x/sys/unix"
-)
+import "unsafe"
 
 const (
 	// IOC_NRBITS is the number of bits allocated for the
@@ -83,21 +57,21 @@ const (
 )
 
 // IOC_TYPECHECK returns the size in bytes of the provided value’s type.
-// It accepts any Go value (typically a zero‐value to denote the type)
-// and wraps unsafe.Sizeof, converting the result to uint.
-// This is useful for validating type sizes when constructing
-// ioctl request codes.
+// It accepts any zero value Go type and wraps [unsafe.Sizeof], converting
+// the result to uint. This is useful for getting the type size when
+// constructing ioctl request codes.
 func IOC_TYPECHECK(typ any) uint {
 	return uint(unsafe.Sizeof(typ))
 }
 
 // IOC packs the four ioctl components into a single request code.
-// dir specifies the data transfer direction (IOC_NONE, IOC_READ, IOC_WRITE).
+// dir specifies the data transfer direction ([IOC_NONE], [IOC_READ],
+// [IOC_WRITE]).
 // typ is the magic number for the driver or subsystem.
 // nr is the command sequence number within that magic range.
 // size is the byte size of any data transfer.
 // The resulting uint can be passed directly to
-// syscall.Syscall or unix.Ioctl*.
+// [syscall.Syscall] or [unix.IoctlGetInt] and family.
 func IOC(dir, typ, nr, size uint) uint {
 	return dir<<IOC_DIRSHIFT |
 		typ<<IOC_TYPESHIFT |
@@ -107,34 +81,81 @@ func IOC(dir, typ, nr, size uint) uint {
 
 // IO returns an ioctl request code that carries no data.
 // It encodes the given magic type and command number into a uint,
-// setting direction to _IOC_NONE and size to zero.
+// setting direction to [IOC_NONE] and size to zero.
+// typ is the magic number for the driver or subsystem.
+// nr is the command sequence number within that magic range.
+// The resulting uint can be passed directly to
+// [syscall.Syscall] or [unix.IoctlGetInt] and family.
 func IO(typ, nr uint) uint {
 	return IOC(IOC_NONE, typ, nr, 0)
 }
 
 // IOR returns an ioctl request code for reading data from the kernel.
-// typ is the magic identifier, nr is the command number, and argtype
-// should be the size of the data type (e.g. unsafe.Sizeof(yourType{})).
+// typ is the magic number for the driver or subsystem.
+// nr is the command sequence number within that magic range.
+// argtype should be a zero‐value Go type.
+// The resulting uint can be passed directly to
+// [syscall.Syscall] or [unix.IoctlGetInt] and family.
 func IOR(typ, nr uint, argtype any) uint {
 	return IOC(IOC_READ, typ, nr, IOC_TYPECHECK(argtype))
 }
 
 // IOW returns an ioctl request code for writing data to the kernel.
-// typ is the magic identifier, nr is the command number, and argtype
-// should be the size of the data type (e.g. unsafe.Sizeof(yourType{})).
+// typ is the magic number for the driver or subsystem.
+// nr is the command sequence number within that magic range.
+// argtype should be a zero‐value Go type.
+// The resulting uint can be passed directly to
+// [syscall.Syscall] or [unix.IoctlGetInt] and family.
 func IOW(typ, nr uint, argtype any) uint {
 	return IOC(IOC_WRITE, typ, nr, IOC_TYPECHECK(argtype))
 }
 
 // IOWR returns an ioctl request code for bidirectional data transfer.
-// typ is the magic identifier, nr is the command number, and argtype
-// should be the size of the data type (e.g. unsafe.Sizeof(yourType{})).
+// typ is the magic number for the driver or subsystem.
+// nr is the command sequence number within that magic range.
+// argtype should be a zero‐value Go type.
+// The resulting uint can be passed directly to
+// [syscall.Syscall] or [unix.IoctlGetInt] and family.
 func IOWR(typ, nr uint, argtype any) uint {
 	return IOC(IOC_READ|IOC_WRITE, typ, nr, IOC_TYPECHECK(argtype))
 }
 
+// IOR_BAD returns an ioctl request code for read-only operations using the
+// legacy bad size encoding.
+// typ is the magic number for the driver or subsystem.
+// nr is the command sequence number within that magic range.
+// argtype should be a zero‐value Go type.
+// The resulting uint can be passed directly to
+// [syscall.Syscall] or [unix.IoctlGetInt] and family.
+func IOR_BAD(typ, nr uint, argtype any) uint {
+	return IOC(IOC_READ, typ, nr, uint(unsafe.Sizeof(argtype)))
+}
+
+// IOW_BAD returns an ioctl request code for write-only operations using the
+// legacy bad size encoding.
+// typ is the magic number for the driver or subsystem.
+// nr is the command sequence number within that magic range.
+// argtype should be a zero‐value Go type.
+// The resulting uint can be passed directly to
+// [syscall.Syscall] or [unix.IoctlGetInt] and family.
+func IOW_BAD(typ, nr uint, argtype any) uint {
+	return IOC(IOC_WRITE, typ, nr, uint(unsafe.Sizeof(argtype)))
+}
+
+// IOWR_BAD returns an ioctl request code for read–write operations using the
+// legacy bad size encoding.
+// typ is the magic number for the driver or subsystem.
+// nr is the command sequence number within that magic range.
+// argtype should be a zero‐value Go type.
+// The resulting uint can be passed directly to
+// [syscall.Syscall] or [unix.IoctlGetInt] and family.
+func IOWR_BAD(typ, nr uint, argtype any) uint {
+	return IOC(IOC_READ|IOC_WRITE, typ, nr, uint(unsafe.Sizeof(argtype)))
+}
+
 // IOC_DIR extracts the direction bits from an ioctl request code.
-// It returns one of IOC_NONE, IOC_WRITE, IOC_READ, or their combination.
+// It returns one of [IOC_NONE], [IOC_WRITE], [IOC_READ], or their
+// combination.
 func IOC_DIR(nr uint) uint {
 	return nr >> IOC_DIRSHIFT & IOC_DIRMASK
 }
@@ -158,19 +179,19 @@ func IOC_SIZE(nr uint) uint {
 }
 
 // IOC_IN returns the encoded flag for a write (user -> kernel) transfer.
-// It shifts IOC_WRITE into the direction bits of an ioctl code.
+// It shifts [IOC_WRITE] into the direction bits of an ioctl code.
 func IOC_IN() uint {
 	return IOC_WRITE << IOC_DIRSHIFT
 }
 
 // IOC_OUT returns the encoded flag for a read (kernel -> user) transfer.
-// It shifts IOC_READ into the direction bits of an ioctl code.
+// It shifts [IOC_READ] into the direction bits of an ioctl code.
 func IOC_OUT() uint {
 	return IOC_READ << IOC_DIRSHIFT
 }
 
 // IOC_INOUT returns the encoded flag for a bidirectional transfer.
-// It combines IOC_WRITE and IOC_READ in the direction bits.
+// It combines [IOC_WRITE] and [IOC_READ] in the direction bits.
 func IOC_INOUT() uint {
 	return IOC_WRITE<<IOC_DIRSHIFT | IOC_READ<<IOC_DIRSHIFT
 }
@@ -185,28 +206,4 @@ func IOCSIZE_MASK() uint {
 // within an ioctl request code.
 func IOSIZE_SHIFT() uint {
 	return IOC_SIZESHIFT
-}
-
-// Any performs an ioctl system call on the given file descriptor.
-// It wraps the raw SYS_IOCTL syscall, passing req as the ioctl request code.
-// The arg parameter is an optional pointer to a value of type T. If arg is
-// non-nil, its address is sent to the kernel, allowing data to be read into
-// or written from *arg. If arg is nil, a zero pointer is passed, which is
-// valid for no-data (_IO) ioctls. On success, any output data from the
-// kernel is populated into *arg and the error returned is nil. On failure,
-// the returned error is the underlying syscall.Errno.
-func Any[T any](fd uintptr, req uint, arg *T) error {
-	var errno syscall.Errno
-
-	_, _, errno = unix.Syscall(
-		unix.SYS_IOCTL,
-		fd,
-		uintptr(req),
-		uintptr(unsafe.Pointer(arg)),
-	)
-	if errno != 0 {
-		return errno
-	}
-
-	return nil
 }

@@ -77,18 +77,28 @@ func (dev *Device) Name() (string, error) {
 
 func (dev *Device) ID() (string, error) {
 	var (
-		buf []byte
+		id  ID
 		err error
 	)
 
-	buf = make([]byte, 256)
-
-	err = ioctl.Any(dev.file.Fd(), EVIOCGNAME(256), &buf)
+	err = ioctl.Any(dev.file.Fd(), EVIOCGID, &id)
 	if err != nil {
-		return "", fmt.Errorf("Device.Name: %w", err)
+		return "", fmt.Errorf("Device.ID: %w", err)
 	}
 
-	return unix.ByteSliceToString(buf), nil
+	return fmt.Sprintf(
+		"bus %x vendor %x product %x version %x",
+		id.Bustype,
+		id.Vendor,
+		id.Product,
+		id.Version,
+	), nil
+}
+
+func (dev *Device) HasAbsoluteAxes() bool {
+}
+
+func (dev *Device) HasButtons() bool {
 }
 
 func (dev *Device) Close() error {
