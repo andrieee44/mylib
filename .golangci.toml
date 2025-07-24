@@ -11,20 +11,21 @@ enable = [
 
 [formatters.settings]
 gofumpt.extra-rules = true
-
-[formatters.settings.golines]
-reformat-tags = true
-shorten-comments = true
+golines.reformat-tags = true
 
 [linters]
 default = "all"
 disable = [
+  "decorder",
   "depguard",
   "exhaustruct",
+  "forbidigo",
   "gochecknoglobals",
   "grouper",
   "mnd",
   "nonamedreturns",
+  "prealloc",
+  "varnamelen",
   "wsl",
 ]
 
@@ -60,7 +61,7 @@ check-type-assertions = true
 check-error-free-encoding = true
 report-no-exported = true
 
-[linters.settings.forbidgo]
+[linters.settings.forbidigo]
 analyze-types = true
 exclude-godoc-examples = false
 
@@ -79,6 +80,7 @@ unnamedResult.checkExported = true
 [linters.settings.govet]
 enable-all = true
 shadow.strict = true
+disable = [ "fieldalignment" ]
 
 [linters.settings.nolintlint]
 allow-unused = false
@@ -99,11 +101,19 @@ name = "line-length-limit"
 disabled = true
 
 [[linters.settings.revive.rules]]
+name = "deep-exit"
+disabled = true
+
+[[linters.settings.revive.rules]]
 name = "var-naming"
 disabled = true
 
 [[linters.settings.revive.rules]]
 name = "add-constant"
+disabled = true
+
+[[linters.settings.revive.rules]]
+name = "max-public-structs"
 disabled = true
 
 [linters.settings.testifylint]

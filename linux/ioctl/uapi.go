@@ -60,7 +60,7 @@ const (
 // It accepts any zero value Go type and wraps [unsafe.Sizeof], converting
 // the result to uint. This is useful for getting the type size when
 // constructing ioctl request codes.
-func IOC_TYPECHECK(typ any) uint {
+func IOC_TYPECHECK[T any](typ T) uint {
 	return uint(unsafe.Sizeof(typ))
 }
 
@@ -96,7 +96,7 @@ func IO(typ, nr uint) uint {
 // argtype should be a zero‐value Go type.
 // The resulting uint can be passed directly to
 // [syscall.Syscall] or [unix.IoctlGetInt] and family.
-func IOR(typ, nr uint, argtype any) uint {
+func IOR[T any](typ, nr uint, argtype T) uint {
 	return IOC(IOC_READ, typ, nr, IOC_TYPECHECK(argtype))
 }
 
@@ -106,7 +106,7 @@ func IOR(typ, nr uint, argtype any) uint {
 // argtype should be a zero‐value Go type.
 // The resulting uint can be passed directly to
 // [syscall.Syscall] or [unix.IoctlGetInt] and family.
-func IOW(typ, nr uint, argtype any) uint {
+func IOW[T any](typ, nr uint, argtype T) uint {
 	return IOC(IOC_WRITE, typ, nr, IOC_TYPECHECK(argtype))
 }
 
@@ -116,7 +116,7 @@ func IOW(typ, nr uint, argtype any) uint {
 // argtype should be a zero‐value Go type.
 // The resulting uint can be passed directly to
 // [syscall.Syscall] or [unix.IoctlGetInt] and family.
-func IOWR(typ, nr uint, argtype any) uint {
+func IOWR[T any](typ, nr uint, argtype T) uint {
 	return IOC(IOC_READ|IOC_WRITE, typ, nr, IOC_TYPECHECK(argtype))
 }
 
@@ -127,7 +127,7 @@ func IOWR(typ, nr uint, argtype any) uint {
 // argtype should be a zero‐value Go type.
 // The resulting uint can be passed directly to
 // [syscall.Syscall] or [unix.IoctlGetInt] and family.
-func IOR_BAD(typ, nr uint, argtype any) uint {
+func IOR_BAD[T any](typ, nr uint, argtype T) uint {
 	return IOC(IOC_READ, typ, nr, uint(unsafe.Sizeof(argtype)))
 }
 
@@ -138,7 +138,7 @@ func IOR_BAD(typ, nr uint, argtype any) uint {
 // argtype should be a zero‐value Go type.
 // The resulting uint can be passed directly to
 // [syscall.Syscall] or [unix.IoctlGetInt] and family.
-func IOW_BAD(typ, nr uint, argtype any) uint {
+func IOW_BAD[T any](typ, nr uint, argtype T) uint {
 	return IOC(IOC_WRITE, typ, nr, uint(unsafe.Sizeof(argtype)))
 }
 
@@ -149,7 +149,7 @@ func IOW_BAD(typ, nr uint, argtype any) uint {
 // argtype should be a zero‐value Go type.
 // The resulting uint can be passed directly to
 // [syscall.Syscall] or [unix.IoctlGetInt] and family.
-func IOWR_BAD(typ, nr uint, argtype any) uint {
+func IOWR_BAD[T any](typ, nr uint, argtype T) uint {
 	return IOC(IOC_READ|IOC_WRITE, typ, nr, uint(unsafe.Sizeof(argtype)))
 }
 
